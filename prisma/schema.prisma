@@ -70,6 +70,7 @@ model Contact {
   email       String?
   phone       String?
   notes       String?
+  employeeName String      @default("Nicht zugewiesen")
   employeeId  String?
   employee    Employee?   @relation(fields: [employeeId], references: [id])
   createdAt   DateTime    @default(now())
