@@ -109,10 +109,13 @@ export default function KontaktePage() {
             Kunden, Interessenten und Geschäftspartner verwalten.
           </p>
         </div>
-        <button
+       <button
   type="button"
   style={styles.primaryButton}
-  onClick={() => setShowForm((current) => !current)}
+  onClick={() => {
+    console.log("Kontakt-Button wurde geklickt");
+    setShowForm(true);
+  }}
 >
   + Kontakt anlegen
 </button>
