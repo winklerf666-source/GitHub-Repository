@@ -131,8 +131,8 @@ export default function KontaktePage() {
         />
       </section>
 
-      {showForm && (
-        <form onSubmit={addContact} style={styles.form}>
+     {showForm === true && (
+  <form onSubmit={addContact} style={styles.form}>
           <h2 style={styles.sectionHeading}>Neuen Kontakt anlegen</h2>
 
           <div style={styles.formGrid}>
