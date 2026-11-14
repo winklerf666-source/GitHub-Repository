@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type ContactType =
   | "Käufer"
@@ -10,7 +10,7 @@ type ContactType =
   | "Sonstige";
 
 type Contact = {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   type: ContactType;
@@ -20,76 +20,56 @@ type Contact = {
   notes: string;
 };
 
-const employees = ["Nicht zugewiesen", "Geschäftsführung", "Mitarbeiter 1", "Mitarbeiter 2"];
-
-const initialContacts: Contact[] = [
-  {
-    id: 1,
-    firstName: "Max",
-    lastName: "Mustermann",
-    type: "Käufer",
-    email: "max@example.de",
-    phone: "0171 1234567",
-    employee: "Mitarbeiter 1",
-    notes: "Sucht eine Eigentumswohnung",
-  },
-  {
-    id: 2,
-    firstName: "Anna",
-    lastName: "Beispiel",
-    type: "Verkäufer",
-    email: "anna@example.de",
-    phone: "0172 7654321",
-    employee: "Geschäftsführung",
-    notes: "Möchte ein Einfamilienhaus verkaufen",
-  },
+const employees = [
+  "Nicht zugewiesen",
+  "Geschäftsführung",
+  "Mitarbeiter 1",
+  "Mitarbeiter 2",
 ];
 
+const emptyForm = {
+  firstName: "",
+  lastName: "",
+  type: "Käufer" as ContactType,
+  email: "",
+  phone: "",
+  employee: "Nicht zugewiesen",
+  notes: "",
+};
+
 export default function KontaktePage() {
-  const [contacts, setContacts] = useState<Contact[]>(initialContacts);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("Alle");
   const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    type: "Käufer" as ContactType,
-    email: "",
-    phone: "",
-    employee: "Nicht zugewiesen",
-    notes: "",
-  });
+  useEffect(() => {
+    async function loadContacts() {
+      try {
+        const response = await fetch("/api/kontakte");
+        if (!response.ok) {
+          throw new Error("Kontakte konnten nicht geladen werden.");
+        }
 
-  const filteredContacts = useMemo(() => {
-    return contacts.filter((contact) => {
-      const text = `${contact.firstName} ${contact.lastName} ${contact.email} ${contact.phone}`.toLowerCase();
-      const matchesSearch = text.includes(search.toLowerCase());
-      const matchesFilter = filter === "Alle" || contact.type === filter;
-      return matchesSearch && matchesFilter;
-    });
-  }, [contacts, search, filter]);
+        const data = await response.json();
+        setContacts(data);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Ein Fehler ist aufgetreten."
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  function addContact(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const newContact: Contact = {
-      id: Date.now(),
-      ...form,
-    };
-
-    setContacts((current) => [newContact, ...current]);
-    setForm({
-      firstName: "",
-      lastName: "",
-      type: "Käufer",
-      email: "",
-      phone: "",
-      employee: "Nicht zugewiesen",
-      notes: "",
-    });
-    setShowForm(false);
-  }
+    loadContacts();
+  }, []);
 
   const types: ContactType[] = [
     "Käufer",
@@ -98,6 +78,57 @@ export default function KontaktePage() {
     "Mieter",
     "Sonstige",
   ];
+
+  const filteredContacts = useMemo(() => {
+    return contacts.filter((contact) => {
+      const text =
+        `${contact.firstName} ${contact.lastName} ${contact.email} ${contact.phone}`.toLowerCase();
+
+      const matchesSearch = text.includes(search.toLowerCase());
+      const matchesFilter =
+        filter === "Alle" || contact.type === filter;
+
+      return matchesSearch && matchesFilter;
+    });
+  }, [contacts, search, filter]);
+
+  async function addContact(
+    event: React.FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+    setSaving(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/kontakte", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Kontakt konnte nicht gespeichert werden."
+        );
+      }
+
+      setContacts((current) => [data, ...current]);
+      setForm(emptyForm);
+      setShowForm(false);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Kontakt konnte nicht gespeichert werden."
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <main style={styles.page}>
@@ -109,38 +140,59 @@ export default function KontaktePage() {
             Kunden, Interessenten und Geschäftspartner verwalten.
           </p>
         </div>
-<button
-  type="button"
-  onClick={() => {
-    alert("Der Kontakt-Button funktioniert!");
-    setShowForm(true);
-  }}
-  style={styles.primaryButton}
->
-  + Kontakt anlegen
-</button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setError("");
+            setShowForm(true);
+          }}
+          style={styles.primaryButton}
+        >
+          + Kontakt anlegen
+        </button>
       </header>
 
       <section style={styles.stats}>
         <Stat label="Kontakte gesamt" value={contacts.length} />
-        <Stat label="Käufer" value={contacts.filter((c) => c.type === "Käufer").length} />
-        <Stat label="Verkäufer" value={contacts.filter((c) => c.type === "Verkäufer").length} />
+        <Stat
+          label="Käufer"
+          value={contacts.filter((c) => c.type === "Käufer").length}
+        />
+        <Stat
+          label="Verkäufer"
+          value={contacts.filter((c) => c.type === "Verkäufer").length}
+        />
         <Stat
           label="Nicht zugewiesen"
-          value={contacts.filter((c) => c.employee === "Nicht zugewiesen").length}
+          value={
+            contacts.filter(
+              (c) => c.employee === "Nicht zugewiesen"
+            ).length
+          }
         />
       </section>
 
-     {showForm === true && (
-  <form onSubmit={addContact} style={styles.form}>
-          <h2 style={styles.sectionHeading}>Neuen Kontakt anlegen</h2>
+      {error && (
+        <div style={styles.error}>
+          {error}
+        </div>
+      )}
+
+      {showForm && (
+        <form onSubmit={addContact} style={styles.form}>
+          <h2 style={styles.sectionHeading}>
+            Neuen Kontakt anlegen
+          </h2>
 
           <div style={styles.formGrid}>
             <Field label="Vorname">
               <input
                 required
                 value={form.firstName}
-                onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, firstName: e.target.value })
+                }
                 style={styles.input}
               />
             </Field>
@@ -149,7 +201,9 @@ export default function KontaktePage() {
               <input
                 required
                 value={form.lastName}
-                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, lastName: e.target.value })
+                }
                 style={styles.input}
               />
             </Field>
@@ -157,10 +211,17 @@ export default function KontaktePage() {
             <Field label="Kontaktart">
               <select
                 value={form.type}
-                onChange={(e) => setForm({ ...form, type: e.target.value as ContactType })}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    type: e.target.value as ContactType,
+                  })
+                }
                 style={styles.input}
               >
-                {types.map((type) => <option key={type}>{type}</option>)}
+                {types.map((type) => (
+                  <option key={type}>{type}</option>
+                ))}
               </select>
             </Field>
 
@@ -168,7 +229,9 @@ export default function KontaktePage() {
               <input
                 type="email"
                 value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, email: e.target.value })
+                }
                 style={styles.input}
               />
             </Field>
@@ -176,7 +239,9 @@ export default function KontaktePage() {
             <Field label="Telefon">
               <input
                 value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, phone: e.target.value })
+                }
                 style={styles.input}
               />
             </Field>
@@ -184,10 +249,14 @@ export default function KontaktePage() {
             <Field label="Zuständiger Mitarbeiter">
               <select
                 value={form.employee}
-                onChange={(e) => setForm({ ...form, employee: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, employee: e.target.value })
+                }
                 style={styles.input}
               >
-                {employees.map((employee) => <option key={employee}>{employee}</option>)}
+                {employees.map((employee) => (
+                  <option key={employee}>{employee}</option>
+                ))}
               </select>
             </Field>
           </div>
@@ -195,17 +264,35 @@ export default function KontaktePage() {
           <Field label="Notizen">
             <textarea
               value={form.notes}
-              onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              style={{ ...styles.input, minHeight: 85, resize: "vertical" }}
+              onChange={(e) =>
+                setForm({ ...form, notes: e.target.value })
+              }
+              style={{
+                ...styles.input,
+                minHeight: 85,
+                resize: "vertical",
+              }}
             />
           </Field>
 
           <div style={styles.formActions}>
-            <button type="button" style={styles.secondaryButton} onClick={() => setShowForm(false)}>
+            <button
+              type="button"
+              style={styles.secondaryButton}
+              onClick={() => {
+                setShowForm(false);
+                setError("");
+              }}
+            >
               Abbrechen
             </button>
-            <button type="submit" style={styles.primaryButton}>
-              Kontakt speichern
+
+            <button
+              type="submit"
+              style={styles.primaryButton}
+              disabled={saving}
+            >
+              {saving ? "Wird gespeichert ..." : "Kontakt speichern"}
             </button>
           </div>
         </form>
@@ -219,54 +306,89 @@ export default function KontaktePage() {
             onChange={(e) => setSearch(e.target.value)}
             style={{ ...styles.input, maxWidth: 390 }}
           />
+
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             style={{ ...styles.input, maxWidth: 190 }}
           >
             <option>Alle</option>
-            {types.map((type) => <option key={type}>{type}</option>)}
+            {types.map((type) => (
+              <option key={type}>{type}</option>
+            ))}
           </select>
         </div>
 
-        <div style={{ overflowX: "auto" }}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Kontakt</th>
-                <th style={styles.th}>Kontaktart</th>
-                <th style={styles.th}>E-Mail / Telefon</th>
-                <th style={styles.th}>Zuständig</th>
-                <th style={styles.th}>Notizen</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredContacts.map((contact) => (
-                <tr key={contact.id}>
-                  <td style={styles.td}>
-                    <strong>{contact.firstName} {contact.lastName}</strong>
-                  </td>
-                  <td style={styles.td}>
-                    <span style={styles.tag}>{contact.type}</span>
-                  </td>
-                  <td style={styles.td}>
-                    <div>{contact.email || "–"}</div>
-                    <small style={styles.muted}>{contact.phone || "–"}</small>
-                  </td>
-                  <td style={styles.td}>{contact.employee}</td>
-                  <td style={styles.td}>{contact.notes || "–"}</td>
-                </tr>
-              ))}
-              {filteredContacts.length === 0 && (
+        {loading ? (
+          <p style={styles.footerNote}>
+            Kontakte werden geladen ...
+          </p>
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table style={styles.table}>
+              <thead>
                 <tr>
-                  <td colSpan={5} style={{ ...styles.td, textAlign: "center", padding: 30 }}>
-                    Keine Kontakte gefunden.
-                  </td>
+                  <th style={styles.th}>Kontakt</th>
+                  <th style={styles.th}>Kontaktart</th>
+                  <th style={styles.th}>E-Mail / Telefon</th>
+                  <th style={styles.th}>Zuständig</th>
+                  <th style={styles.th}>Notizen</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+
+              <tbody>
+                {filteredContacts.map((contact) => (
+                  <tr key={contact.id}>
+                    <td style={styles.td}>
+                      <strong>
+                        {contact.firstName} {contact.lastName}
+                      </strong>
+                    </td>
+
+                    <td style={styles.td}>
+                      <span style={styles.tag}>
+                        {contact.type}
+                      </span>
+                    </td>
+
+                    <td style={styles.td}>
+                      <div>{contact.email || "–"}</div>
+                      <small style={styles.muted}>
+                        {contact.phone || "–"}
+                      </small>
+                    </td>
+
+                    <td style={styles.td}>
+                      {contact.employee}
+                    </td>
+
+                    <td style={styles.td}>
+                      {contact.notes || "–"}
+                    </td>
+                  </tr>
+                ))}
+
+                {filteredContacts.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      style={{
+                        ...styles.td,
+                        textAlign: "center",
+                        padding: 30,
+                      }}
+                    >
+                      {search || filter !== "Alle"
+                        ? "Keine Kontakte gefunden."
+                        : "Noch keine Kontakte vorhanden."}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
         <p style={styles.footerNote}>
           {filteredContacts.length} von {contacts.length} Kontakten angezeigt
         </p>
@@ -275,7 +397,13 @@ export default function KontaktePage() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({
+  label,
+  value,
+}: {
+  label: string;
+  value: number;
+}) {
   return (
     <div style={styles.stat}>
       <span style={styles.muted}>{label}</span>
@@ -284,7 +412,13 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label style={styles.field}>
       <span style={styles.fieldLabel}>{label}</span>
@@ -309,9 +443,19 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: "wrap",
     marginBottom: 30,
   },
-  eyebrow: { color: "#64748b", fontSize: 12, letterSpacing: 2 },
-  heading: { fontSize: 32, margin: "8px 0" },
-  subtitle: { color: "#64748b", margin: 0 },
+  eyebrow: {
+    color: "#64748b",
+    fontSize: 12,
+    letterSpacing: 2,
+  },
+  heading: {
+    fontSize: 32,
+    margin: "8px 0",
+  },
+  subtitle: {
+    color: "#64748b",
+    margin: 0,
+  },
   stats: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
@@ -327,8 +471,13 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 12,
     border: "1px solid #e2e8f0",
   },
-  statValue: { fontSize: 28 },
-  muted: { color: "#64748b", fontSize: 13 },
+  statValue: {
+    fontSize: 28,
+  },
+  muted: {
+    color: "#64748b",
+    fontSize: 13,
+  },
   panel: {
     background: "white",
     padding: 22,
@@ -351,7 +500,11 @@ const styles: Record<string, React.CSSProperties> = {
     background: "white",
     color: "#172b4d",
   },
-  table: { width: "100%", borderCollapse: "collapse", minWidth: 760 },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    minWidth: 760,
+  },
   th: {
     textAlign: "left",
     padding: 13,
@@ -397,15 +550,44 @@ const styles: Record<string, React.CSSProperties> = {
     border: "1px solid #dbe3ed",
     marginBottom: 24,
   },
-  sectionHeading: { marginTop: 0, fontSize: 20 },
+  sectionHeading: {
+    marginTop: 0,
+    fontSize: 20,
+  },
   formGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
     gap: 16,
     marginBottom: 16,
   },
-  field: { display: "flex", flexDirection: "column", gap: 7, marginBottom: 14 },
-  fieldLabel: { fontSize: 13, fontWeight: 600, color: "#475569" },
-  formActions: { display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 18 },
-  footerNote: { color: "#64748b", fontSize: 12, marginBottom: 0 },
+  field: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 7,
+    marginBottom: 14,
+  },
+  fieldLabel: {
+    fontSize: 13,
+    fontWeight: 600,
+    color: "#475569",
+  },
+  formActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginTop: 18,
+  },
+  footerNote: {
+    color: "#64748b",
+    fontSize: 12,
+    marginBottom: 0,
+  },
+  error: {
+    background: "#fff1f0",
+    color: "#b42318",
+    border: "1px solid #fecdca",
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 20,
+  },
 };
