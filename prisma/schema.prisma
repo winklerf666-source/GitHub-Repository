@@ -92,6 +92,7 @@ model Property {
   price        Decimal?       @db.Decimal(12, 2)
   livingArea   Decimal?       @db.Decimal(10, 2)
   rooms        Decimal?       @db.Decimal(4, 1)
+  employeeName String @default("Nicht zugewiesen")
   employeeId   String?
   employee     Employee?      @relation(fields: [employeeId], references: [id])
   createdAt    DateTime       @default(now())
