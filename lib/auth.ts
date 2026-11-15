@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+import { prisma } from "./prisma";
 import {
   createHmac,
   randomBytes,
@@ -111,4 +113,43 @@ export function verifySessionToken(
   } catch {
     return null;
   }
+}
+
+export async function getCurrentUser() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("immo_session")?.value;
+
+  if (!token) {
+    return null;
+  }
+
+  const session = verifySessionToken(token);
+
+  if (!session) {
+    return null;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      employee: {
+        select: {
+          active: true,
+        },
+      },
+    },
+  });
+
+  if (!user || (user.employee && !user.employee.active)) {
+    return null;
+  }
+
+  return {
+    id: user.id,
+    email: user.email,
+    role: user.role,
+  };
 }
