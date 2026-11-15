@@ -1,16 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient, ContactType } from "@prisma/client";
-
-const globalForPrisma = globalThis as unknown as {
-  prisma?: PrismaClient;
-};
-
-const prisma =
-  globalForPrisma.prisma ?? new PrismaClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}
+import { ContactType } from "@prisma/client";
+import { prisma } from "../../../lib/prisma";
 
 const typeToDatabase: Record<string, ContactType> = {
   Käufer: "BUYER",
