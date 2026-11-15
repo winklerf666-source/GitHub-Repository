@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient, PropertyType, PropertyStatus } from "@prisma/client";
+import { PropertyType, PropertyStatus } from "@prisma/client";
+import { prisma } from "../../../lib/prisma";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
