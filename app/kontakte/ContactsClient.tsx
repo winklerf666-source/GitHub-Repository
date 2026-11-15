@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { FormEvent, ReactNode, CSSProperties } from "react";
 
 type ContactType =
   | "Käufer"
@@ -37,7 +38,7 @@ const emptyForm = {
   notes: "",
 };
 
-export default function KontaktePage() {
+export default function ContactClient() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("Alle");
@@ -93,7 +94,7 @@ export default function KontaktePage() {
   }, [contacts, search, filter]);
 
   async function addContact(
-    event: React.FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
     setSaving(true);
@@ -417,7 +418,7 @@ function Field({
   children,
 }: {
   label: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <label style={styles.field}>
@@ -427,7 +428,7 @@ function Field({
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
+const styles: Record<string, CSSProperties> = {
   page: {
     minHeight: "100vh",
     padding: "40px 5%",
