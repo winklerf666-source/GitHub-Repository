@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ContactType } from "@prisma/client";
 import { prisma } from "../../../lib/prisma";
+import { getCurrentUser } from "../../../lib/auth";
 
 const typeToDatabase: Record<string, ContactType> = {
   Käufer: "BUYER",
@@ -40,6 +41,15 @@ function formatContact(contact: {
 
 export async function GET() {
   try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Bitte zuerst anmelden." },
+        { status: 401 }
+      );
+    }
+
     const contacts = await prisma.contact.findMany({
       orderBy: { createdAt: "desc" },
     });
@@ -56,6 +66,15 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Bitte zuerst anmelden." },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     if (
