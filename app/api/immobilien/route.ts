@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { PropertyType, PropertyStatus } from "@prisma/client";
 import { prisma } from "../../../lib/prisma";
+import { getCurrentUser } from "../../../lib/auth";
 
 const typeToDb: Record<string, PropertyType> = {
   Wohnung: "APARTMENT",
@@ -38,6 +39,15 @@ const statusToLabel: Record<PropertyStatus, string> = {
 
 export async function GET() {
   try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Bitte zuerst anmelden." },
+        { status: 401 }
+      );
+    }
+
     const properties = await prisma.property.findMany({
       orderBy: { createdAt: "desc" },
     });
@@ -72,6 +82,15 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Bitte zuerst anmelden." },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     if (!body.title || typeof body.title !== "string") {
@@ -144,4 +163,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
