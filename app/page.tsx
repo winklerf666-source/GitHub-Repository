@@ -1,4 +1,13 @@
-export default function Home() {
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "../lib/auth";
+
+export default async function Home() {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
   return (
     <main style={{
       minHeight: "100vh",
@@ -12,7 +21,9 @@ export default function Home() {
         padding: "24px 40px"
       }}>
         <h1 style={{ margin: 0 }}>IMMO OFFICE</h1>
-        <p style={{ marginBottom: 0 }}>Ihre Immobilien. Ihr Team. Ihre Übersicht.</p>
+        <p style={{ marginBottom: 0 }}>
+          Ihre Immobilien. Ihr Team. Ihre Übersicht.
+        </p>
       </header>
 
       <section style={{ padding: 40 }}>
