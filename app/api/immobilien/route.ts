@@ -20,4 +20,10 @@ const typeToLabel: Record<PropertyType, string> = {
 };
 
 const statusToDb: Record<string, PropertyStatus> = {
-  Entwurf: "
+  Entwurf: "DRAFT",
+  Aktiv: "ACTIVE",
+  Reserviert: "RESERVED",
+  Verkauft: "SOLD",
+  Vermietet: "RENTED",
+  Archiviert: "ARCHIVED",
+};
