@@ -1,4 +1,3 @@
-
 import { NextResponse } from "next/server";
 import { PropertyType, PropertyStatus } from "@prisma/client";
 import { prisma } from "../../../lib/prisma";
