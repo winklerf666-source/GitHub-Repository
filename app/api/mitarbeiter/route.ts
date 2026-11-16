@@ -7,17 +7,11 @@ export async function GET() {
     const user = await getCurrentUser();
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Nicht angemeldet." },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Nicht angemeldet." }, { status: 401 });
     }
 
     if (user.role !== "ADMIN") {
-      return NextResponse.json(
-        { error: "Keine Berechtigung." },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Keine Berechtigung." }, { status: 403 });
     }
 
     const employees = await prisma.employee.findMany({
@@ -29,15 +23,12 @@ export async function GET() {
           },
         },
       },
-      orderBy: {
-        lastName: "asc",
-      },
+      orderBy: { lastName: "asc" },
     });
 
     return NextResponse.json(employees);
   } catch (error) {
     console.error("Mitarbeiter laden:", error);
-
     return NextResponse.json(
       { error: "Mitarbeiter konnten nicht geladen werden." },
       { status: 500 }
@@ -50,17 +41,11 @@ export async function POST(request: Request) {
     const currentUser = await getCurrentUser();
 
     if (!currentUser) {
-      return NextResponse.json(
-        { error: "Nicht angemeldet." },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Nicht angemeldet." }, { status: 401 });
     }
 
     if (currentUser.role !== "ADMIN") {
-      return NextResponse.json(
-        { error: "Keine Berechtigung." },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Keine Berechtigung." }, { status: 403 });
     }
 
     const body = await request.json();
@@ -121,9 +106,7 @@ export async function POST(request: Request) {
           },
         },
       },
-      include: {
-        employee: true,
-      },
+      include: { employee: true },
     });
 
     return NextResponse.json(
@@ -155,6 +138,128 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       { error: "Mitarbeiter konnte nicht angelegt werden." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return NextResponse.json({ error: "Nicht angemeldet." }, { status: 401 });
+    }
+
+    if (currentUser.role !== "ADMIN") {
+      return NextResponse.json({ error: "Keine Berechtigung." }, { status: 403 });
+    }
+
+    const body = await request.json();
+
+    const id = String(body.id || "").trim();
+    const firstName = String(body.firstName || "").trim();
+    const lastName = String(body.lastName || "").trim();
+    const email = String(body.email || "").trim().toLowerCase();
+    const phone = String(body.phone || "").trim();
+    const role = body.role;
+    const active = body.active;
+
+    if (
+      !id ||
+      !firstName ||
+      !lastName ||
+      !email ||
+      typeof active !== "boolean"
+    ) {
+      return NextResponse.json(
+        { error: "Bitte alle Pflichtfelder ausfüllen." },
+        { status: 400 }
+      );
+    }
+
+    if (
+      firstName.length > 100 ||
+      lastName.length > 100 ||
+      email.length > 254 ||
+      phone.length > 40 ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ) {
+      return NextResponse.json(
+        { error: "Bitte gültige Eingaben verwenden." },
+        { status: 400 }
+      );
+    }
+
+    if (!["EMPLOYEE", "MANAGEMENT"].includes(role)) {
+      return NextResponse.json(
+        { error: "Ungültige Mitarbeiterrolle." },
+        { status: 400 }
+      );
+    }
+
+    const existing = await prisma.employee.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+
+    if (!existing) {
+      return NextResponse.json(
+        { error: "Mitarbeiter nicht gefunden." },
+        { status: 404 }
+      );
+    }
+
+    if (!active && existing.userId === currentUser.id) {
+      return NextResponse.json(
+        { error: "Das eigene Administratorkonto kann nicht deaktiviert werden." },
+        { status: 400 }
+      );
+    }
+
+    const updated = await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: existing.userId },
+        data: { email, role },
+      });
+
+      return tx.employee.update({
+        where: { id },
+        data: {
+          firstName,
+          lastName,
+          phone: phone || null,
+          active,
+        },
+        include: {
+          user: {
+            select: {
+              email: true,
+              role: true,
+            },
+          },
+        },
+      });
+    });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error("Mitarbeiter aktualisieren:", error);
+
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "P2002"
+    ) {
+      return NextResponse.json(
+        { error: "Diese E-Mail-Adresse ist bereits vergeben." },
+        { status: 409 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: "Mitarbeiter konnte nicht aktualisiert werden." },
       { status: 500 }
     );
   }
