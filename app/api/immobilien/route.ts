@@ -1,3 +1,4 @@
+
 import { NextResponse } from "next/server";
 import { PropertyType, PropertyStatus } from "@prisma/client";
 import { prisma } from "../../../lib/prisma";
@@ -159,6 +160,62 @@ export async function POST(request: Request) {
     console.error("Fehler beim Speichern der Immobilie:", error);
     return NextResponse.json(
       { error: "Immobilie konnte nicht gespeichert werden." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Bitte zuerst anmelden." },
+        { status: 401 }
+      );
+    }
+
+    if (user.role !== "ADMIN" && user.role !== "MANAGEMENT") {
+      return NextResponse.json(
+        { error: "Du hast keine Berechtigung, Immobilien zu löschen." },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+
+    if (!body.id || typeof body.id !== "string") {
+      return NextResponse.json(
+        { error: "Ungültige Immobilien-ID." },
+        { status: 400 }
+      );
+    }
+
+    await prisma.property.delete({
+      where: { id: body.id },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Immobilie wurde gelöscht.",
+    });
+  } catch (error) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "P2025"
+    ) {
+      return NextResponse.json(
+        { error: "Immobilie wurde nicht gefunden." },
+        { status: 404 }
+      );
+    }
+
+    console.error("Fehler beim Löschen der Immobilie:", error);
+    return NextResponse.json(
+      { error: "Immobilie konnte nicht gelöscht werden." },
       { status: 500 }
     );
   }
