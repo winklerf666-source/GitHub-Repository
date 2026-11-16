@@ -1,4 +1,6 @@
+
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getCurrentUser } from "../lib/auth";
 
 export default async function Home() {
@@ -7,6 +9,15 @@ export default async function Home() {
   if (!user) {
     redirect("/login");
   }
+
+  const modules = [
+    ["Kontakte", "Käufer, Verkäufer und Interessenten", "/kontakte"],
+    ["Immobilien", "Objekte und Vermarktung verwalten", "/immobilien"],
+    ["Anfragen", "Neue Anfragen im Blick behalten", null],
+    ["Aufgaben", "Termine und Wiedervorlagen organisieren", null],
+    ["Exposés", "Premium- und Online-Exposés", null],
+    ["Auswertungen", "Vertrieb und Mitarbeiterstatistiken", null]
+  ] as const;
 
   return (
     <main style={{
@@ -36,24 +47,33 @@ export default async function Home() {
           gap: 20,
           marginTop: 30
         }}>
-          {[
-            ["Kontakte", "Käufer, Verkäufer und Interessenten"],
-            ["Immobilien", "Objekte und Vermarktung verwalten"],
-            ["Anfragen", "Neue Anfragen im Blick behalten"],
-            ["Aufgaben", "Termine und Wiedervorlagen organisieren"],
-            ["Exposés", "Premium- und Online-Exposés"],
-            ["Auswertungen", "Vertrieb und Mitarbeiterstatistiken"]
-          ].map(([title, description]) => (
-            <article key={title} style={{
-              background: "white",
-              padding: 24,
-              borderRadius: 12,
-              boxShadow: "0 2px 10px rgba(0,0,0,0.05)"
-            }}>
-              <h3>{title}</h3>
-              <p>{description}</p>
-            </article>
-          ))}
+          {modules.map(([title, description, href]) => {
+            const content = (
+              <article style={{
+                background: "white",
+                padding: 24,
+                borderRadius: 12,
+                boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+                cursor: href ? "pointer" : "default"
+              }}>
+                <h3>{title}</h3>
+                <p>{description}</p>
+                {href && <p style={{ color: "#2563eb" }}>Öffnen →</p>}
+              </article>
+            );
+
+            return href ? (
+              <Link
+                key={title}
+                href={href}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                {content}
+              </Link>
+            ) : (
+              <div key={title}>{content}</div>
+            );
+          })}
         </div>
       </section>
     </main>
