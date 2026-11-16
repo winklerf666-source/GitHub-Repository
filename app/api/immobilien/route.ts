@@ -135,7 +135,11 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json(properties.map(formatProperty));
+    return NextResponse.json(properties.map(formatProperty), {
+  headers: {
+    "X-User-Role": user.role,
+  },
+});
   } catch (error) {
     console.error("Fehler beim Laden der Immobilien:", error);
 
