@@ -712,7 +712,7 @@ export default function ImmobilienPage() {
           </select>
         </div>
 
-        {/* Immobilienliste */}
+               {/* Immobilienliste */}
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
             <h2 className="font-semibold text-gray-900">
@@ -763,35 +763,24 @@ export default function ImmobilienPage() {
                           {property.street || "Keine Straße angegeben"}
                         </p>
                       </td>
-
                       <td className="px-5 py-4 text-gray-600">
                         {property.propertyType}
                       </td>
-
                       <td className="px-5 py-4 text-gray-600">
-                        {[property.postalCode, property.city]
-                          .filter(Boolean)
-                          .join(" ") || "–"}
+                        {[property.postalCode, property.city].filter(Boolean).join(" ") || "–"}
                       </td>
-
                       <td className="px-5 py-4 font-medium text-gray-900">
                         {formatPrice(property.price)}
                       </td>
-
                       <td className="px-5 py-4 text-gray-600">
-                        {property.livingArea != null
-                          ? `${property.livingArea} m²`
-                          : "–"}
+                        {property.livingArea != null ? `${property.livingArea} m²` : "–"}
                       </td>
-
                       <td className="px-5 py-4">
                         <select
                           aria-label={`Status von ${property.title} ändern`}
                           className={`rounded-full border-0 px-2.5 py-1 text-xs font-medium outline-none ${statusStyle(property.status)}`}
                           value={property.status}
-                          onChange={(e) =>
-                            changeStatus(property, e.target.value)
-                          }
+                          onChange={(e) => changeStatus(property, e.target.value)}
                         >
                           {statuses.map((status) => (
                             <option key={status} value={status}>
@@ -800,11 +789,9 @@ export default function ImmobilienPage() {
                           ))}
                         </select>
                       </td>
-
                       <td className="px-5 py-4 text-gray-600">
                         {getEmployeeName(property)}
                       </td>
-
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2">
                           <button
@@ -813,7 +800,6 @@ export default function ImmobilienPage() {
                           >
                             Bearbeiten
                           </button>
-
                           {isManager && (
                             <button
                               onClick={() => deleteProperty(property)}
