@@ -111,7 +111,7 @@ export default function MitarbeiterClient() {
             }}
             className="rounded-lg bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800"
           >
-            {showForm ? "Abbrechen" : "+ Mitarbeiter hinzufügen"}
+            {showForm ? "← Zurück" : "+ Mitarbeiter hinzufügen"}
           </button>
         </div>
 
@@ -215,7 +215,8 @@ export default function MitarbeiterClient() {
           </form>
         )}
 
-        <section className="rounded-xl bg-white p-6 shadow-sm">
+        {!showForm && (
+          <section className="rounded-xl bg-white p-6 shadow-sm">
           <h2 className="mb-5 text-xl font-bold">
             Mitarbeiter ({employees.length})
           </h2>
@@ -260,7 +261,8 @@ export default function MitarbeiterClient() {
               </table>
             </div>
           )}
-        </section>
+          </section>
+        )}
       </div>
     </main>
   );
