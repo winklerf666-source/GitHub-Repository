@@ -353,6 +353,7 @@ export default function ImmobilienPage() {
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="mx-auto max-w-7xl space-y-6">
 
+       
         {/* Kopfbereich */}
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
@@ -372,21 +373,7 @@ export default function ImmobilienPage() {
             )}
           </div>
 
-          <button
-            onClick={() => {
-              if (showForm) {
-                setShowForm(false);
-                setEditingId(null);
-                setForm({ ...emptyForm });
-                setError("");
-              } else {
-                openNewForm();
-              }
-            }}
-            className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-          >
-            {showForm ? "Formular schließen" : "+ Immobilie hinzufügen"}
-                   <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             {showForm ? (
               <button
                 type="button"
@@ -420,6 +407,7 @@ export default function ImmobilienPage() {
               </>
             )}
           </div>
+        </div>
 
         {/* Fehlermeldung */}
         {error && (
