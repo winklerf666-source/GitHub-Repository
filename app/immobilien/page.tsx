@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 
 type Property = {
   id: string;
@@ -98,6 +99,7 @@ function getEmployeeName(property: Property) {
 }
 
 export default function ImmobilienPage() {
+  const router = useRouter();
   const [properties, setProperties] = useState<Property[]>([]);
   const [role, setRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
@@ -384,8 +386,40 @@ export default function ImmobilienPage() {
             className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
           >
             {showForm ? "Formular schließen" : "+ Immobilie hinzufügen"}
-          </button>
-        </div>
+                   <div className="flex flex-wrap gap-2">
+            {showForm ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingId(null);
+                  setForm({ ...emptyForm });
+                  setError("");
+                }}
+                className="rounded-lg border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                ← Zurück
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => router.push("/")}
+                  className="rounded-lg border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  ← Zurück
+                </button>
+
+                <button
+                  type="button"
+                  onClick={openNewForm}
+                  className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                >
+                  + Immobilie hinzufügen
+                </button>
+              </>
+            )}
+          </div>
 
         {/* Fehlermeldung */}
         {error && (
