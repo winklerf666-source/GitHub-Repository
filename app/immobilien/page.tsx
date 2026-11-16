@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 type Property = {
   id: string;
@@ -15,7 +15,24 @@ type Property = {
   livingArea?: number | null;
   rooms?: number | null;
   employee?: string | null;
+  employeeName?: string | null;
   createdAt?: string;
+};
+
+type UserRole = "ADMIN" | "MANAGEMENT" | "EMPLOYEE";
+
+type PropertyForm = {
+  title: string;
+  propertyType: string;
+  status: string;
+  street: string;
+  postalCode: string;
+  city: string;
+  price: string;
+  livingArea: string;
+  rooms: string;
+  employee: string;
+  description: string;
 };
 
 const propertyTypes = [
@@ -35,7 +52,7 @@ const statuses = [
   "Archiviert",
 ];
 
-const emptyForm = {
+const emptyForm: PropertyForm = {
   title: "",
   propertyType: "Wohnung",
   status: "Entwurf",
@@ -76,15 +93,23 @@ function statusStyle(status: string) {
   }
 }
 
+function getEmployeeName(property: Property) {
+  return property.employee || property.employeeName || "Nicht zugewiesen";
+}
+
 export default function ImmobilienPage() {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [role, setRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("Alle");
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(emptyForm);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState<PropertyForm>({ ...emptyForm });
+
+  const isManager = role === "ADMIN" || role === "MANAGEMENT";
 
   async function loadProperties() {
     try {
@@ -92,8 +117,19 @@ export default function ImmobilienPage() {
       setError("");
 
       const response = await fetch("/api/immobilien");
+
       if (!response.ok) {
         throw new Error("Immobilien konnten nicht geladen werden.");
+      }
+
+      const userRole = response.headers.get("X-User-Role");
+
+      if (
+        userRole === "ADMIN" ||
+        userRole === "MANAGEMENT" ||
+        userRole === "EMPLOYEE"
+      ) {
+        setRole(userRole);
       }
 
       const data = await response.json();
@@ -113,7 +149,36 @@ export default function ImmobilienPage() {
     loadProperties();
   }, []);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function openNewForm() {
+    setEditingId(null);
+    setForm({ ...emptyForm });
+    setError("");
+    setShowForm(true);
+  }
+
+  function openEditForm(property: Property) {
+    setEditingId(property.id);
+
+    setForm({
+      title: property.title || "",
+      propertyType: property.propertyType || "Wohnung",
+      status: property.status || "Entwurf",
+      street: property.street || "",
+      postalCode: property.postalCode || "",
+      city: property.city || "",
+      price: property.price != null ? String(property.price) : "",
+      livingArea:
+        property.livingArea != null ? String(property.livingArea) : "",
+      rooms: property.rooms != null ? String(property.rooms) : "",
+      employee: getEmployeeName(property),
+      description: property.description || "",
+    });
+
+    setError("");
+    setShowForm(true);
+  }
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (!form.title.trim()) {
@@ -126,11 +191,13 @@ export default function ImmobilienPage() {
       setError("");
 
       const response = await fetch("/api/immobilien", {
-        method: "POST",
+        method: editingId ? "PATCH" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(
+          editingId ? { id: editingId, ...form } : form
+        ),
       });
 
       const data = await response.json();
@@ -141,8 +208,18 @@ export default function ImmobilienPage() {
         );
       }
 
-      setProperties((current) => [data, ...current]);
-      setForm(emptyForm);
+      if (editingId) {
+        setProperties((current) =>
+          current.map((property) =>
+            property.id === editingId ? data : property
+          )
+        );
+      } else {
+        setProperties((current) => [data, ...current]);
+      }
+
+      setForm({ ...emptyForm });
+      setEditingId(null);
       setShowForm(false);
     } catch (err) {
       setError(
@@ -155,6 +232,82 @@ export default function ImmobilienPage() {
     }
   }
 
+  async function changeStatus(property: Property, newStatus: string) {
+    try {
+      setError("");
+
+      const response = await fetch("/api/immobilien", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: property.id,
+          status: newStatus,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Der Status konnte nicht geändert werden."
+        );
+      }
+
+      setProperties((current) =>
+        current.map((item) =>
+          item.id === property.id ? data : item
+        )
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Der Status konnte nicht geändert werden."
+      );
+      await loadProperties();
+    }
+  }
+
+  async function deleteProperty(property: Property) {
+    const confirmed = window.confirm(
+      `Möchtest du die Immobilie "${property.title}" wirklich löschen?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setError("");
+
+      const response = await fetch("/api/immobilien", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: property.id }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Die Immobilie konnte nicht gelöscht werden."
+        );
+      }
+
+      setProperties((current) =>
+        current.filter((item) => item.id !== property.id)
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Beim Löschen ist ein Fehler aufgetreten."
+      );
+    }
+  }
+
   const filteredProperties = useMemo(() => {
     return properties.filter((property) => {
       const searchText = search.toLowerCase();
@@ -164,7 +317,7 @@ export default function ImmobilienPage() {
         property.street,
         property.postalCode,
         property.city,
-        property.employee,
+        getEmployeeName(property),
         property.propertyType,
       ]
         .filter(Boolean)
@@ -210,12 +363,23 @@ export default function ImmobilienPage() {
             <p className="mt-1 text-sm text-gray-500">
               Verwalte deine Immobilien und behalte den Überblick.
             </p>
+            {role && (
+              <p className="mt-2 text-xs text-gray-400">
+                Angemeldet als: {role}
+              </p>
+            )}
           </div>
 
           <button
             onClick={() => {
-              setError("");
-              setShowForm(!showForm);
+              if (showForm) {
+                setShowForm(false);
+                setEditingId(null);
+                setForm({ ...emptyForm });
+                setError("");
+              } else {
+                openNewForm();
+              }
             }}
             className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
           >
@@ -261,11 +425,11 @@ export default function ImmobilienPage() {
           </div>
         </div>
 
-        {/* Neue Immobilie */}
+        {/* Formular zum Anlegen und Bearbeiten */}
         {showForm && (
           <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm md:p-7">
             <h2 className="mb-6 text-xl font-bold text-gray-900">
-              Neue Immobilie anlegen
+              {editingId ? "Immobilie bearbeiten" : "Neue Immobilie anlegen"}
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -428,19 +592,21 @@ export default function ImmobilienPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                    Zuständiger Mitarbeiter
-                  </label>
-                  <input
-                    className={inputClass}
-                    placeholder="Name des Mitarbeiters"
-                    value={form.employee}
-                    onChange={(e) =>
-                      setForm({ ...form, employee: e.target.value })
-                    }
-                  />
-                </div>
+                {isManager && (
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                      Zuständiger Mitarbeiter
+                    </label>
+                    <input
+                      className={inputClass}
+                      placeholder="Name des Mitarbeiters"
+                      value={form.employee}
+                      onChange={(e) =>
+                        setForm({ ...form, employee: e.target.value })
+                      }
+                    />
+                  </div>
+                )}
 
                 <div className="md:col-span-2">
                   <label className="mb-1.5 block text-sm font-medium text-gray-700">
@@ -463,7 +629,9 @@ export default function ImmobilienPage() {
                   type="button"
                   onClick={() => {
                     setShowForm(false);
-                    setForm(emptyForm);
+                    setEditingId(null);
+                    setForm({ ...emptyForm });
+                    setError("");
                   }}
                   className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
@@ -475,7 +643,11 @@ export default function ImmobilienPage() {
                   disabled={saving}
                   className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {saving ? "Wird gespeichert ..." : "Immobilie speichern"}
+                  {saving
+                    ? "Wird gespeichert ..."
+                    : editingId
+                      ? "Änderungen speichern"
+                      : "Immobilie speichern"}
                 </button>
               </div>
             </form>
@@ -532,7 +704,7 @@ export default function ImmobilienPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[850px] text-left text-sm">
+              <table className="w-full min-w-[1050px] text-left text-sm">
                 <thead className="bg-gray-50 text-xs uppercase text-gray-500">
                   <tr>
                     <th className="px-5 py-4 font-semibold">Immobilie</th>
@@ -542,6 +714,7 @@ export default function ImmobilienPage() {
                     <th className="px-5 py-4 font-semibold">Fläche</th>
                     <th className="px-5 py-4 font-semibold">Status</th>
                     <th className="px-5 py-4 font-semibold">Mitarbeiter</th>
+                    <th className="px-5 py-4 font-semibold">Aktionen</th>
                   </tr>
                 </thead>
 
@@ -578,15 +751,44 @@ export default function ImmobilienPage() {
                       </td>
 
                       <td className="px-5 py-4">
-                        <span
-                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${statusStyle(property.status)}`}
+                        <select
+                          aria-label={`Status von ${property.title} ändern`}
+                          className={`rounded-full border-0 px-2.5 py-1 text-xs font-medium outline-none ${statusStyle(property.status)}`}
+                          value={property.status}
+                          onChange={(e) =>
+                            changeStatus(property, e.target.value)
+                          }
                         >
-                          {property.status}
-                        </span>
+                          {statuses.map((status) => (
+                            <option key={status} value={status}>
+                              {status}
+                            </option>
+                          ))}
+                        </select>
                       </td>
 
                       <td className="px-5 py-4 text-gray-600">
-                        {property.employee || "Nicht zugewiesen"}
+                        {getEmployeeName(property)}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => openEditForm(property)}
+                            className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100"
+                          >
+                            Bearbeiten
+                          </button>
+
+                          {isManager && (
+                            <button
+                              onClick={() => deleteProperty(property)}
+                              className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+                            >
+                              Löschen
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -595,7 +797,6 @@ export default function ImmobilienPage() {
             </div>
           )}
         </div>
-
       </div>
     </div>
   );
