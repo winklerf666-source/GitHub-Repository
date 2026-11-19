@@ -72,9 +72,10 @@ model Contact {
   notes       String?
   employeeName String      @default("Nicht zugewiesen")
   employeeId  String?
-  employee    Employee?   @relation(fields: [employeeId], references: [id])
+  employee    Employee?   @relation(fields: [employeeId], references: [id])  
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  documents   Document[]
 
   @@index([lastName, firstName])
   @@index([email])
@@ -95,9 +96,48 @@ model Property {
   employeeName String @default("Nicht zugewiesen")
   employeeId   String?
   employee     Employee?      @relation(fields: [employeeId], references: [id])
+  images       PropertyImage[]
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+  documents    Document[]
 
   @@index([status])
   @@index([city])
+}
+
+model PropertyImage {
+  id          String   @id @default(cuid())
+  propertyId  String
+  storageKey  String   @unique
+  fileName    String
+  contentType String
+  size        Int
+  altText     String?
+  sortOrder   Int      @default(0)
+
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@index([propertyId, sortOrder])
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  fileName    String
+  storageKey  String   @unique
+  contentType String
+  size        Int
+
+  propertyId  String?
+  contactId   String?
+
+  property    Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  contact     Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime @default(now())
+
+  @@index([propertyId])
+  @@index([contactId])
+  @@index([createdAt])
 }
