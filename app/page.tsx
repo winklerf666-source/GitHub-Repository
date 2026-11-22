@@ -14,7 +14,7 @@ export default async function Home() {
     ["Immobilien", "Objekte und Vermarktung verwalten", "/immobilien"],
     ["Anfragen", "Neue Anfragen im Blick behalten", null],
     ["Aufgaben", "Termine und Wiedervorlagen organisieren", null],
-    ["Exposés", "Premium- und Online-Exposés", null],
+    ["Exposés", "Premium- und Online-Exposés", "/expose"],
     ["Auswertungen", "Vertrieb und Mitarbeiterstatistiken", null],
     ...(user.role === "ADMIN"
       ? [["Mitarbeiter", "Mitarbeiter und Benutzerkonten verwalten", "/mitarbeiter"] as const]
