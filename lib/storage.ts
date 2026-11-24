@@ -4,6 +4,7 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
+  GetObjectCommand,
 } from "@aws-sdk/client-s3";
 
 function getStorageConfig() {
@@ -86,4 +87,24 @@ export async function deleteFile(key: string) {
       Key: key,
     })
   );
+}
+
+export async function downloadFile(key: string) {
+  const config = getStorageConfig();
+
+  const result = await getS3Client().send(
+    new GetObjectCommand({
+      Bucket: config.bucket,
+      Key: key,
+    })
+  );
+
+  if (!result.Body) {
+    throw new Error("Die Datei wurde im Speicher nicht gefunden.");
+  }
+
+  return {
+    body: await result.Body.transformToByteArray(),
+    contentType: result.ContentType || "application/octet-stream",
+  };
 }
