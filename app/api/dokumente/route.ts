@@ -202,7 +202,7 @@ export async function POST(request: Request) {
     storageKey = `documents/${randomUUID()}-${safeFileName}`;
 
     const contentType = file.type || "application/octet-stream";
-    const body = new Uint8Array(await file.arrayBuffer());
+    const body = Buffer.from(await file.arrayBuffer());
 
     await uploadFile({
       key: storageKey,
