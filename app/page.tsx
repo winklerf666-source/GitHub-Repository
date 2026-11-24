@@ -12,6 +12,7 @@ export default async function Home() {
   const modules = [
     ["Kontakte", "Käufer, Verkäufer und Interessenten", "/kontakte"],
     ["Immobilien", "Objekte und Vermarktung verwalten", "/immobilien"],
+    ["Dokumente", "Dokumente zentral verwalten", "/dokumente"],
     ["Anfragen", "Neue Anfragen im Blick behalten", null],
     ["Aufgaben", "Termine und Wiedervorlagen organisieren", null],
     ["Exposés", "Premium- und Online-Exposés", "/expose"],
