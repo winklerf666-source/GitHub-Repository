@@ -679,6 +679,7 @@ export default function ImmobilienPage() {
                   </div>
                 )}
 
+                
                 <div className="md:col-span-2">
                   <label className="mb-1.5 block text-sm font-medium text-gray-700">
                     Beschreibung
@@ -693,7 +694,36 @@ export default function ImmobilienPage() {
                     }
                   />
                 </div>
+
+                {editingId && (
+                  <div className="md:col-span-2">
+                    <label className="mb-2 block text-sm font-semibold text-gray-800">
+                      Immobilienbilder hochladen
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      disabled={uploadingImages}
+                      onChange={(e) =>
+                        uploadPropertyImages(editingId, e.target.files)
+                      }
+                      className={inputClass}
+                    />
+                    <p className="mt-2 text-xs text-gray-500">
+                      Mehrere Bilder möglich, maximal 10 MB pro Bild.
+                    </p>
+                    {uploadingImages && (
+                      <p className="mt-2 text-sm text-blue-600">
+                        Bilder werden hochgeladen ...
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
+
+              <div className="flex flex-col-reverse justify-end gap-3 border-t border-gray-100 pt-5 sm:flex-row">
+
 
               <div className="flex flex-col-reverse justify-end gap-3 border-t border-gray-100 pt-5 sm:flex-row">
                 <button
