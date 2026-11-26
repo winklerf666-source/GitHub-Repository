@@ -212,6 +212,47 @@ export default function ExposePage() {
         {/* Übernommene Objektdaten */}
         {selectedProperty && (
           <div className="expose-print rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                        {/* Modernes Exposé-Titelblatt */}
+            <div className="mb-8">
+              <div className="mb-5 flex items-center justify-between">
+                <p className="text-sm font-bold tracking-widest text-blue-900">
+                  IMMO OFFICE
+                </p>
+                <p className="text-xs font-medium tracking-widest text-gray-400">
+                  IMMOBILIENEXPOSÉ
+                </p>
+              </div>
+
+              {selectedProperty.images?.[0] && (
+                <img
+                  src={`/api/immobilienbilder/${selectedProperty.images[0].id}`}
+                  alt={selectedProperty.title}
+                  className="max-h-[430px] w-full rounded-xl bg-gray-50 object-contain"
+                />
+              )}
+
+              <div className="mt-7">
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-800">
+                  Exklusiv für Sie
+                </p>
+
+                <h1 className="mt-3 text-3xl font-bold tracking-tight text-gray-900">
+                  {selectedProperty.title}
+                </h1>
+
+                <p className="mt-3 text-lg text-gray-600">
+                  {[
+                    selectedProperty.street,
+                    selectedProperty.postalCode,
+                    selectedProperty.city,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")}
+                </p>
+              </div>
+
+              <div className="mt-7 h-1 w-20 rounded-full bg-blue-900" />
+            </div>
         
             <button
               type="button"
@@ -221,10 +262,10 @@ export default function ExposePage() {
               PDF erstellen / drucken
             </button>
         
-            <h2 className="text-xl font-semibold text-gray-900">
-              2. Übernommene Objektdaten
+            <h2 className="mt-8 border-b border-gray-200 pb-3 text-2xl font-bold tracking-tight text-blue-950">
+              Ihre Immobilie im Überblick
             </h2>
-
+            
             <p className="mt-2 text-sm text-gray-500">
               Diese Angaben stammen aus deiner Immobilienverwaltung.
             </p>
