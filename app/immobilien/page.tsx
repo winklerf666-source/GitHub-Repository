@@ -241,7 +241,48 @@ export default function ImmobilienPage() {
       setSaving(false);
     }
   }
+  
+  async function uploadPropertyImages(
+    propertyId: string,
+    files: FileList | null
+  ) {
+    if (!files || files.length === 0) return;
 
+    try {
+      setUploadingImages(true);
+      setError("");
+
+      for (const file of Array.from(files)) {
+        const formData = new FormData();
+        formData.append("propertyId", propertyId);
+        formData.append("file", file);
+
+        const response = await fetch("/api/immobilienbilder", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.error || "Ein Bild konnte nicht hochgeladen werden."
+          );
+        }
+      }
+
+      await loadProperties();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Die Bilder konnten nicht hochgeladen werden."
+      );
+    } finally {
+      setUploadingImages(false);
+    }
+  }
+    
   async function changeStatus(property: Property, newStatus: string) {
     try {
       setError("");
