@@ -721,10 +721,7 @@ export default function ImmobilienPage() {
                   </div>
                 )}
               </div>
-
-              <div className="flex flex-col-reverse justify-end gap-3 border-t border-gray-100 pt-5 sm:flex-row">
-
-
+              
               <div className="flex flex-col-reverse justify-end gap-3 border-t border-gray-100 pt-5 sm:flex-row">
                 <button
                   type="button"
