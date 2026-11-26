@@ -729,7 +729,7 @@ export default function ImmobilienPage() {
                               <img
                                 src={`/api/immobilienbilder/${image.id}`}
                                 alt={image.altText || image.fileName}
-                                className="h-32 w-full object-cover"
+                                className="h-32 w-full object-contain bg-gray-50"
                               />
                               <p className="truncate px-2 py-1 text-xs text-gray-600">
                                 {image.fileName}
