@@ -169,6 +169,15 @@ export default function ExposePage() {
         {/* Übernommene Objektdaten */}
         {selectedProperty && (
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="mb-5 rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 print:hidden"
+            >
+              PDF erstellen / drucken
+            </button>
+        
             <h2 className="text-xl font-semibold text-gray-900">
               2. Übernommene Objektdaten
             </h2>
