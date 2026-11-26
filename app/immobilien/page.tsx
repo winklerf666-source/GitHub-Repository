@@ -18,6 +18,13 @@ type Property = {
   employee?: string | null;
   employeeName?: string | null;
   createdAt?: string;
+  images?: {
+    id: string;
+    fileName: string;
+    contentType: string;
+    altText?: string | null;
+    sortOrder: number;
+  }[];
 };
 
 type UserRole = "ADMIN" | "MANAGEMENT" | "EMPLOYEE";
