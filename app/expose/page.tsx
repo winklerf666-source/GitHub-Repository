@@ -15,8 +15,15 @@ type Property = {
   price?: number | null;
   livingArea?: number | null;
   rooms?: number | null;
-  employee?: string | null;
+    employee?: string | null;
   employeeName?: string | null;
+  images?: {
+    id: string;
+    fileName: string;
+    contentType: string;
+    altText?: string | null;
+    sortOrder: number;
+  }[];
 };
 
 function formatPrice(price?: number | null) {
