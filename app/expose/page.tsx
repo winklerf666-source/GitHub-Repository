@@ -76,11 +76,54 @@ export default function ExposePage() {
     (property) => property.id === selectedId
   );
 
+    const printStyles = `
+    @media print {
+      @page {
+        size: A4;
+        margin: 15mm;
+      }
+
+      body {
+        background: white !important;
+      }
+
+      body * {
+        visibility: hidden;
+      }
+
+      .expose-print,
+      .expose-print * {
+        visibility: visible;
+      }
+
+      .expose-print {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      .print\\:hidden {
+        display: none !important;
+      }
+
+      img {
+        max-width: 100%;
+        object-fit: contain !important;
+      }
+    }
+  `;
+
   const inputClass =
     "w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <style>{printStyles}</style>
       <div className="mx-auto max-w-7xl space-y-6">
 
         {/* Kopfbereich */}
@@ -168,7 +211,7 @@ export default function ExposePage() {
 
         {/* Übernommene Objektdaten */}
         {selectedProperty && (
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="expose-print rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         
             <button
               type="button"
