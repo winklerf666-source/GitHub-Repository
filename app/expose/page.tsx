@@ -317,34 +317,36 @@ export default function ExposePage() {
                     .join(" ") || "Nicht angegeben"}
                 </p>
               </div>
-
-              <div>
-                <p className="text-xs font-medium uppercase text-gray-400">
-                  Kaufpreis
-                </p>
-                <p className="mt-1 font-semibold text-gray-900">
-                  {formatPrice(selectedProperty.price)}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-xs font-medium uppercase text-gray-400">
-                  Wohnfläche
-                </p>
-                <p className="mt-1 font-semibold text-gray-900">
-                  {selectedProperty.livingArea != null
-                    ? `${selectedProperty.livingArea} m²`
-                    : "Nicht angegeben"}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-xs font-medium uppercase text-gray-400">
-                  Zimmer
-                </p>
-                <p className="mt-1 font-semibold text-gray-900">
-                  {selectedProperty.rooms ?? "Nicht angegeben"}
-                </p>
+              
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                    Kaufpreis
+                  </p>
+                  <p className="mt-2 text-xl font-bold text-blue-950">
+                    {formatPrice(selectedProperty.price)}
+                  </p>
+                </div>
+              
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                    Wohnfläche
+                  </p>
+                  <p className="mt-2 text-xl font-bold text-blue-950">
+                    {selectedProperty.livingArea != null
+                      ? `${selectedProperty.livingArea} m²`
+                      : "Nicht angegeben"}
+                  </p>
+                </div>
+              
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                    Zimmer
+                  </p>
+                  <p className="mt-2 text-xl font-bold text-blue-950">
+                    {selectedProperty.rooms ?? "Nicht angegeben"}
+                  </p>
+                </div>
               </div>
 
               <div>
