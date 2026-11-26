@@ -54,6 +54,13 @@ function formatProperty(property: {
   rooms: unknown;
   employeeName: string;
   createdAt: Date;
+  images?: {
+    id: string;
+    fileName: string;
+    contentType: string;
+    altText: string | null;
+    sortOrder: number;
+  }[];
 }) {
   return {
     id: property.id,
@@ -70,6 +77,7 @@ function formatProperty(property: {
     rooms: property.rooms != null ? Number(property.rooms) : null,
     employee: property.employeeName,
     createdAt: property.createdAt,
+    images: property.images ?? [],
   };
 }
 
