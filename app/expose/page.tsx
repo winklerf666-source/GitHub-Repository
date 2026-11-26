@@ -290,7 +290,7 @@ export default function ExposePage() {
                       <img
                         src={`/api/immobilienbilder/${image.id}`}
                         alt={image.altText || image.fileName}
-                        className="h-64 w-full object-cover"
+                        className="h-auto max-h-[500px] w-full object-contain bg-gray-50"
                       />
                     </div>
                   ))}
