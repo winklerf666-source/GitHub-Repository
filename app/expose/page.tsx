@@ -274,6 +274,33 @@ export default function ExposePage() {
                 {selectedProperty.description || "Keine Beschreibung hinterlegt."}
               </p>
             </div>
+                        {/* Immobilienbilder */}
+            <div className="mt-6 border-t border-gray-100 pt-5">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Immobilienbilder
+              </h3>
+
+              {selectedProperty.images?.length ? (
+                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {selectedProperty.images.map((image) => (
+                    <div
+                      key={image.id}
+                      className="overflow-hidden rounded-xl border border-gray-200"
+                    >
+                      <img
+                        src={`/api/immobilienbilder/${image.id}`}
+                        alt={image.altText || image.fileName}
+                        className="h-64 w-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-2 text-sm text-gray-500">
+                  Für diese Immobilie sind noch keine Bilder vorhanden.
+                </p>
+              )}
+            </div>
           </div>
         )}
 
