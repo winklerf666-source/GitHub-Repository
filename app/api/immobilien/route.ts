@@ -132,6 +132,20 @@ export async function GET() {
 
     const properties = await prisma.property.findMany({
       where,
+      include: {
+        images: {
+          orderBy: {
+            sortOrder: "asc",
+          },
+          select: {
+            id: true,
+            fileName: true,
+            contentType: true,
+            altText: true,
+            sortOrder: true,
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
 
