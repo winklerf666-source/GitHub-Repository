@@ -718,6 +718,30 @@ export default function ImmobilienPage() {
                         Bilder werden hochgeladen ...
                       </p>
                     )}
+                    {properties
+                      .find((property) => property.id === editingId)
+                      ?.images?.length ? (
+                      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                        {properties
+                          .find((property) => property.id === editingId)
+                          ?.images?.map((image) => (
+                            <div key={image.id} className="overflow-hidden rounded-lg border">
+                              <img
+                                src={`/api/immobilienbilder/${image.id}`}
+                                alt={image.altText || image.fileName}
+                                className="h-32 w-full object-cover"
+                              />
+                              <p className="truncate px-2 py-1 text-xs text-gray-600">
+                                {image.fileName}
+                              </p>
+                            </div>
+                          ))}
+                      </div>
+                    ) : (
+                      <p className="mt-3 text-xs text-gray-500">
+                        Noch keine Bilder hochgeladen.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
