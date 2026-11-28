@@ -136,7 +136,7 @@ export default function ExposePage() {
         margin-bottom: 5mm;
       }
       
-      .expose-print .gallery-image:nth-child(3n + 1):not(:first-child) {
+      .expose-print .gallery-image:nth-child(2n + 1):not(:first-child) {
         break-before: page;
         page-break-before: always;
       }
