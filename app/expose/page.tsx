@@ -121,9 +121,31 @@ export default function ExposePage() {
         object-fit: contain !important;
       }
 
+      .expose-print .gallery-section {
+        break-before: page;
+        page-break-before: always;
+      }
+      
+      .expose-print .gallery-section .grid {
+        display: block !important;
+      }
+      
       .expose-print .gallery-image {
         break-inside: avoid;
         page-break-inside: avoid;
+        margin-bottom: 5mm;
+      }
+      
+      .expose-print .gallery-image:nth-child(3n + 1):not(:first-child) {
+        break-before: page;
+        page-break-before: always;
+      }
+      
+      .expose-print .gallery-image img {
+        height: 62mm !important;
+        max-height: 62mm !important;
+        width: 100%;
+        object-fit: contain !important;
       }
     }
   `;
@@ -380,7 +402,7 @@ export default function ExposePage() {
               </p>
             </div>
                         {/* Immobilienbilder */}
-            <div className="mt-6 border-t border-gray-100 pt-5">
+            <div className="gallery-section mt-6 border-t border-gray-100 pt-5">
               <h3 className="text-lg font-semibold text-gray-900">
                 Immobilienbilder
               </h3>
