@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-type Property 
-  {
+type Property = {
   id: string;
   title: string;
   propertyType: string;
