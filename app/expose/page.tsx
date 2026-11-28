@@ -82,7 +82,12 @@ export default function ExposePage() {
         size: A4;
         margin: 15mm;
       }
-
+      
+      .expose-cover {
+        break-after: page;
+        page-break-after: always;
+      }
+      
       body {
         background: white !important;
       }
@@ -213,7 +218,7 @@ export default function ExposePage() {
         {selectedProperty && (
           <div className="expose-print rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                         {/* Modernes Exposé-Titelblatt */}
-            <div className="mb-8">
+            <div className="expose-cover mb-8">
               <div className="mb-5 flex items-center justify-between">
                 <p className="text-sm font-bold tracking-widest text-blue-900">
                   IMMO OFFICE
