@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-type Property = {
+type Property 
+  {
   id: string;
   title: string;
   propertyType: string;
@@ -269,46 +270,46 @@ export default function ExposePage() {
             <p className="mt-2 text-sm text-gray-500">
               Diese Angaben stammen aus deiner Immobilienverwaltung.
             </p>
-
+                        
             <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               <div>
-                <p className="text-xs font-medium uppercase text-gray-400">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
                   Immobilienname
                 </p>
                 <p className="mt-1 font-semibold text-gray-900">
                   {selectedProperty.title}
                 </p>
               </div>
-
+            
               <div>
-                <p className="text-xs font-medium uppercase text-gray-400">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
                   Immobilientyp
                 </p>
                 <p className="mt-1 font-semibold text-gray-900">
                   {selectedProperty.propertyType}
                 </p>
               </div>
-
+            
               <div>
-                <p className="text-xs font-medium uppercase text-gray-400">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
                   Status
                 </p>
                 <p className="mt-1 font-semibold text-gray-900">
                   {selectedProperty.status}
                 </p>
               </div>
-
+            
               <div>
-                <p className="text-xs font-medium uppercase text-gray-400">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
                   Straße
                 </p>
                 <p className="mt-1 font-semibold text-gray-900">
                   {selectedProperty.street || "Nicht angegeben"}
                 </p>
               </div>
-
+            
               <div>
-                <p className="text-xs font-medium uppercase text-gray-400">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
                   Postleitzahl und Ort
                 </p>
                 <p className="mt-1 font-semibold text-gray-900">
@@ -317,50 +318,50 @@ export default function ExposePage() {
                     .join(" ") || "Nicht angegeben"}
                 </p>
               </div>
-              
-              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-                    Kaufpreis
-                  </p>
-                  <p className="mt-2 text-xl font-bold text-blue-950">
-                    {formatPrice(selectedProperty.price)}
-                  </p>
-                </div>
-              
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-                    Wohnfläche
-                  </p>
-                  <p className="mt-2 text-xl font-bold text-blue-950">
-                    {selectedProperty.livingArea != null
-                      ? `${selectedProperty.livingArea} m²`
-                      : "Nicht angegeben"}
-                  </p>
-                </div>
-              
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-                    Zimmer
-                  </p>
-                  <p className="mt-2 text-xl font-bold text-blue-950">
-                    {selectedProperty.rooms ?? "Nicht angegeben"}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs font-medium uppercase text-gray-400">
-                  Zuständiger Mitarbeiter
+            </div>
+            
+            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                  Kaufpreis
                 </p>
-                <p className="mt-1 font-semibold text-gray-900">
-                  {selectedProperty.employee ||
-                    selectedProperty.employeeName ||
-                    "Nicht zugewiesen"}
+                <p className="mt-2 text-xl font-bold text-blue-950">
+                  {formatPrice(selectedProperty.price)}
+                </p>
+              </div>
+            
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                  Wohnfläche
+                </p>
+                <p className="mt-2 text-xl font-bold text-blue-950">
+                  {selectedProperty.livingArea != null
+                    ? `${selectedProperty.livingArea} m²`
+                    : "Nicht angegeben"}
+                </p>
+              </div>
+            
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                  Zimmer
+                </p>
+                <p className="mt-2 text-xl font-bold text-blue-950">
+                  {selectedProperty.rooms ?? "Nicht angegeben"}
                 </p>
               </div>
             </div>
-
+            
+            <div className="mt-6 rounded-xl border border-gray-200 p-5">
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                Zuständiger Mitarbeiter
+              </p>
+              <p className="mt-2 font-semibold text-blue-950">
+                {selectedProperty.employee ||
+                  selectedProperty.employeeName ||
+                  "Nicht zugewiesen"}
+              </p>
+            </div>
+            
             <div className="mt-6 border-t border-gray-100 pt-5">
               <p className="text-xs font-medium uppercase text-gray-400">
                 Objektbeschreibung
