@@ -120,6 +120,11 @@ export default function ExposePage() {
         max-width: 100%;
         object-fit: contain !important;
       }
+
+      .expose-print .gallery-image {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
     }
   `;
 
@@ -381,11 +386,11 @@ export default function ExposePage() {
               </h3>
 
               {selectedProperty.images?.length ? (
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {selectedProperty.images.map((image) => (
                     <div
                       key={image.id}
-                      className="overflow-hidden rounded-xl border border-gray-200"
+                      className="gallery-image overflow-hidden rounded-xl border border-gray-200"
                     >
                       <img
                         src={`/api/immobilienbilder/${image.id}`}
